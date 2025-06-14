@@ -1,6 +1,6 @@
 // src/socket.js
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // your backend port
+const socket = io("http://3.88.165.7:5000"); // your backend port
 
 export default socket;
