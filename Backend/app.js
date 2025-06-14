@@ -13,6 +13,10 @@ const server = http.createServer(app);
 // Pass server to the Socket.IO setup
 setupSocket(server);
 
+app.get("/", (req, res) => {
+  res.send("Hello from the backend!");
+});
+
 const PORT=process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log("Server running on http://localhost:", PORT);
