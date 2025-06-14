@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import socket from "../components/Socket";
+import socket from "../Components/Socket";
 
 export default function useChatSocket(nickname, nicknameSet) {
   const [messages, setMessages] = useState([]);

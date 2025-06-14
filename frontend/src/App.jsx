@@ -1,4 +1,4 @@
-import Sidebar from './Components/Sidebar';
+
 import ChatContainer from './Components/ChatContainer';
 
 export default function App() {
