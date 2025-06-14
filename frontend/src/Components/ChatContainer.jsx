@@ -1,23 +1,55 @@
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ChatHeader from "./ChatHeader";
+import socket from "./Socket";
+
 export default function ChatContainer() {
-  const [messages, setMessages] = useState([
-    { from: "Alice", text: "Hey How r u. Long time no see. come to my home today. i have organized a super cool christmas party!" },
-    { from: "You", text: "Hi there!" },
-  ]);
+  const scrollRef = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [nickname, setNickname] = useState("Anonymous");
+
+  useEffect(() => {
+    console.log(socket);
+    socket.on("user_joined", (nickname) => {
+      setNickname(nickname);
+    })
+    socket.on("chat-message", (data) => {
+      setMessages((prev) => [...prev, data]);
+    });
+
+    return () => {
+      socket.off("chat-message");
+    };
+  }, [nickname]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   const handleSend = (msg) => {
-    if (msg.trim()) {
-      setMessages([...messages, { from: "You", text: msg }]);
-    }
+    const newMsg = { text: msg, from: nickname };
+    setMessages((prev) => [...prev, { text: msg, from: "You" }]);
+    socket.emit("chat-message", newMsg);
   };
 
   return (
     <div className="flex flex-col w-4/5 h-full">
-        <ChatHeader/>
-      <div className="flex-1 p-4 space-y-2 overflow-y-auto bg-transparent scrollbar-thin scrollbar-thumb-[#555]">
+      <ChatHeader />
+      <div
+        ref={scrollRef}
+        className="flex-1 p-4 space-y-2 overflow-y-auto bg-transparent scrollbar-none"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
+        {" "}
         {messages.map((msg, idx) => (
           <MessageBubble key={idx} from={msg.from} text={msg.text} />
         ))}
