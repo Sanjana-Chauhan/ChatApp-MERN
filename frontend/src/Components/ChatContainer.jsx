@@ -1,61 +1,53 @@
+import { useEffect, useRef, useState } from "react";
+import useChatSocket from "../Hooks/useSocket";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
-import { useState, useEffect, useRef } from "react";
 import ChatHeader from "./ChatHeader";
-import socket from "./Socket";
+import Sidebar from "./Sidebar";
+import LandingPage from "./LandingPage";
 
 export default function ChatContainer() {
-  const scrollRef = useRef(null);
-  const [messages, setMessages] = useState([]);
-  const [nickname, setNickname] = useState("Anonymous");
+  const [nickname, setNickname] = useState("");
+  const [nicknameSet, setNicknameSet] = useState(false);
+  const { messages, userList, sendMessage } = useChatSocket(nickname, nicknameSet);
 
+  const bottomRef = useRef(null); // 📌 To scroll to the last message
+
+  // 📦 Smooth scroll into view on new message
   useEffect(() => {
-    console.log(socket);
-    socket.on("user_joined", (nickname) => {
-      setNickname(nickname);
-    })
-    socket.on("chat-message", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    return () => {
-      socket.off("chat-message");
-    };
-  }, [nickname]);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  const handleSend = (msg) => {
-    const newMsg = { text: msg, from: nickname };
-    setMessages((prev) => [...prev, { text: msg, from: "You" }]);
-    socket.emit("chat-message", newMsg);
-  };
+  if (!nicknameSet) {
+    return (
+      <LandingPage
+        onJoin={(name) => {
+          setNickname(name);
+          setNicknameSet(true);
+        }}
+      />
+    );
+  }
 
   return (
-    <div className="flex flex-col w-4/5 h-full">
-      <ChatHeader />
-      <div
-        ref={scrollRef}
-        className="flex-1 p-4 space-y-2 overflow-y-auto bg-transparent scrollbar-none"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        {" "}
-        {messages.map((msg, idx) => (
-          <MessageBubble key={idx} from={msg.from} text={msg.text} />
-        ))}
-      </div>
+    <div className="flex w-full h-full">
+      <Sidebar users={userList} />
+      <div className="flex flex-col w-4/5 h-full">
+        <ChatHeader />
+        
+        <div
+          className="flex-1 p-4 space-y-2 overflow-y-auto hide-scrollbar"
+        >
+          {messages.map((msg, idx) => (
+            <MessageBubble key={idx} from={msg.from} text={msg.text} />
+          ))}
+          <div ref={bottomRef} /> {/* 👈 Dummy div for scroll anchor */}
+        </div>
 
-      <MessageInput onSend={handleSend} />
+        <MessageInput onSend={sendMessage} />
+      </div>
     </div>
   );
 }
