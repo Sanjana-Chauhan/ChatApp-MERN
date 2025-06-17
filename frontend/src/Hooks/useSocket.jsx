@@ -4,7 +4,7 @@ import socket from "../Components/Socket";
 export default function useChatSocket(nickname, nicknameSet) {
   const [messages, setMessages] = useState([]);
   const [userList, setUserList] = useState([]);
-  const hasSentNickname = useRef(false); // 🧠 track if nickname was emitted
+  const hasSentNickname = useRef(false); 
 
   useEffect(() => {
     socket.on("connect", () => {

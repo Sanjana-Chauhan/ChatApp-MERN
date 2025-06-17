@@ -4,7 +4,7 @@
     console.log(users);
     return (
       <div className="w-1/5 py-4 px-2 overflow-y-auto border-r border-r-gray-300 bg-gray-300/60">
-        <h2 className="text-lg font-semibold mb-4 text-black">Group Members</h2>
+        <h2 className="text-lg font-semibold mb-4 text-black">Online Members</h2>
         {users.map((user) => (
           <div
             key={user.id}
